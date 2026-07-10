@@ -6,7 +6,7 @@ RealSeek is an advanced agentic real estate recommendation platform. It leverage
 
 ---
 
-## 🚀 Key Features
+## Key Features
 
 * **Multi-Agent Orchestration**: Master Orchestrator coordinating specialized agents (User Intent, Discovery, Market Intel, Neighborhood, Deal Analyzer, Recommendation).
 * **Dynamic Flowchart Visualization**: Real-time tracking of agent activation and execution states with edge-aligned SVG network links.
@@ -17,7 +17,7 @@ RealSeek is an advanced agentic real estate recommendation platform. It leverage
 
 ---
 
-## 🛠️ Setup & Installation
+## Setup & Installation
 
 ### Prerequisites
 * Python 3.10 or higher
@@ -52,7 +52,7 @@ pip install -r requirements.txt
 
 ---
 
-## 💻 Running the Application
+## Running the Application
 
 To start both the frontend served web server and backend REST server concurrently, run:
 ```bash
