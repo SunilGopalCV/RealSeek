@@ -1,4 +1,4 @@
-# RealSeek - Premium AI Real Estate Advisor 🏠✨
+# RealSeek - AI Real Estate Advisor
 
 > **Powered by Cognizant Neuro SAN**
 
@@ -60,5 +60,3 @@ To start both the frontend served web server and backend REST server concurrentl
 ```
 * **Frontend Dashboard**: [http://localhost:5173/](http://localhost:5173/)
 * **Backend REST API**: `http://localhost:8080`
-
-*For more details on starting servers individually or using the dashboard, check the [User Guide](USER_GUIDE.md).*
