@@ -1,0 +1,33 @@
+# Virtual environment
+venv/
+.venv/
+env/
+ENV/
+
+# Secret credentials / environment variables
+.env
+.env.*
+!.env.example
+
+# SQLite Databases & Caches
+*.db
+backend/.langchain_cache.db
+backend/.search_cache.db
+backend/nss_local.db
+nss_local.db
+
+# Python bytecode / caches
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Logs
+logs/
+*.log
+backend/logs/
+
+# Editor / OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

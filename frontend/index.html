@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RealSeek - Premium AI Real Estate Advisor</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Marked Markdown Parser -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link rel="stylesheet" href="style.css?v=1.2">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Panel 1: Chat Assistant -->
+        <aside class="chat-sidebar">
+            <header class="chat-header">
+                <div class="header-logo">
+                    <i data-lucide="sparkles" class="logo-icon"></i>
+                    <div class="logo-text-wrapper">
+                        <h1>RealSeek</h1>
+                        <span class="logo-subtext">Powered by Neuro San</span>
+                    </div>
+                </div>
+                <div class="header-actions">
+                    <button id="new-chat-btn" class="header-action-btn" title="New Chat">
+                        <i data-lucide="plus"></i>
+                        <span>New Chat</span>
+                    </button>
+                </div>
+            </header>
+
+            <div class="chat-messages" id="chat-messages">
+                <!-- Welcome Screen -->
+                <div class="welcome-container" id="welcome-screen">
+                    <div class="welcome-logo-wrapper">
+                        <i data-lucide="sparkles" class="welcome-sparkle-icon"></i>
+                    </div>
+                    <h2>Welcome to RealSeek</h2>
+                    <p class="welcome-desc">Your intelligent real estate network. Tell me your budget, property type, and neighborhood preferences, and I will search the web to find matches.</p>
+                    
+                    <div class="suggestion-header">Suggested searches</div>
+                    <div class="suggestion-grid">
+                        <div class="suggestion-card" onclick="selectSuggestion('Find a 3-bedroom house in Austin, Texas under $500,000')">
+                            <i data-lucide="home" class="card-icon blue"></i>
+                            <span>Find 3-bed houses in Austin under $500k</span>
+                        </div>
+                        <div class="suggestion-card" onclick="selectSuggestion('Tell me about the safest neighborhoods in Austin with highly rated schools')">
+                            <i data-lucide="shield-check" class="card-icon green"></i>
+                            <span>Safest neighborhoods & top schools</span>
+                        </div>
+                        <div class="suggestion-card" onclick="selectSuggestion('What are the current real estate market trends in Austin right now?')">
+                            <i data-lucide="trending-up" class="card-icon yellow"></i>
+                            <span>Current Austin market trends</span>
+                        </div>
+                    </div>
+                </div>
+                <!-- Messages will be injected here -->
+            </div>
+
+            <div class="agent-status-bar" id="agent-status-bar">
+                <span class="status-pulse idle" id="status-dot"></span>
+                <span class="status-text" id="status-text">Ready to assist you. Ask a query to begin.</span>
+            </div>
+
+            <div class="chat-input-area">
+                <textarea id="chat-input" placeholder="e.g. Find a 3-bedroom house in Austin under $500,000" rows="1"></textarea>
+                <button id="send-btn" class="send-btn" disabled>
+                    <i data-lucide="arrow-up"></i>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Panel 2: Agent Execution Flowchart -->
+        <section class="orchestration-panel">
+            <header class="panel-header">
+                <i data-lucide="activity" class="panel-icon"></i>
+                <h2>Agent Execution Flow</h2>
+            </header>
+
+            <div class="flowchart-container">
+                <div class="graph-container">
+                    <svg class="graph-svg" id="graph-svg"></svg>
+                    
+                    <!-- Central Hub (Cognitive Coordinator) -->
+                    <div class="hub-wrapper">
+                        <div class="hub-node" id="node-master_orchestrator_agent">
+                            <div class="hub-orb">
+                                <i data-lucide="brain"></i>
+                            </div>
+                            <span>Cognitive Coordinator</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Satellite Agents -->
+                    <div class="satellites-grid">
+                        <div class="sat-node pending" id="node-user_intent_agent">
+                            <div class="sat-icon"><i data-lucide="message-square"></i></div>
+                            <div class="sat-label">User Intent</div>
+                        </div>
+                        <div class="sat-node pending" id="node-property_discovery_agent">
+                            <div class="sat-icon"><i data-lucide="search"></i></div>
+                            <div class="sat-label">Discovery</div>
+                        </div>
+                        <div class="sat-node pending" id="node-market_intelligence_agent">
+                            <div class="sat-icon"><i data-lucide="trending-up"></i></div>
+                            <div class="sat-label">Market Intel</div>
+                        </div>
+                        <div class="sat-node pending" id="node-neighborhood_intelligence_agent">
+                            <div class="sat-icon"><i data-lucide="navigation"></i></div>
+                            <div class="sat-label">Neighborhood</div>
+                        </div>
+                        <div class="sat-node pending" id="node-deal_analyzer_agent">
+                            <div class="sat-icon"><i data-lucide="percent"></i></div>
+                            <div class="sat-label">Deal Analyzer</div>
+                        </div>
+                        <div class="sat-node pending" id="node-recommendation_agent">
+                            <div class="sat-icon"><i data-lucide="check-circle"></i></div>
+                            <div class="sat-label">Recommendation</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Panel 3: Insights & Calculator Dashboard -->
+        <main class="dashboard-main">
+            <header class="dashboard-header">
+                <div class="tabs">
+                    <button class="tab-btn active" data-tab="insights">
+                        <i data-lucide="lightbulb" class="tab-icon"></i>
+                        <span>Discovery Insights</span>
+                    </button>
+                    <button class="tab-btn" data-tab="calculator">
+                        <i data-lucide="calculator" class="tab-icon"></i>
+                        <span>Mortgage Calculator</span>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Insights Tab -->
+            <div class="tab-content active" id="tab-insights">
+                <div class="insights-container">
+                    <div class="insights-empty-state" id="insights-empty">
+                        <i data-lucide="search" class="empty-icon"></i>
+                        <h3>No Insights Sourced Yet</h3>
+                        <p>Submit a query to begin searching. Sourced listings, specific URLs, and neighborhood scores will populate here in real-time.</p>
+                    </div>
+
+                    <div class="insights-populated" id="insights-populated" style="display: none;">
+                        <!-- Property listings cards grid -->
+                        <div class="insights-section">
+                            <h3 class="insights-section-title"><i data-lucide="home"></i>Sourced Listings & URLs</h3>
+                            <div class="listings-grid" id="insights-listings">
+                                <!-- Listings injected here -->
+                            </div>
+                        </div>
+
+                        <!-- Neighborhood / Market summaries side-by-side -->
+                        <div class="insights-grid-two">
+                            <div class="insights-section card-style">
+                                <h3 class="insights-section-title"><i data-lucide="trending-up"></i>Market Trend</h3>
+                                <div class="metric-list" id="insights-market">
+                                    <!-- Market metrics injected here -->
+                                </div>
+                            </div>
+                            <div class="insights-section card-style">
+                                <h3 class="insights-section-title"><i data-lucide="award"></i>Neighborhood Index</h3>
+                                <div class="metric-list" id="insights-neighborhood">
+                                    <!-- Neighborhood details injected here -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Calculator Tab -->
+            <div class="tab-content" id="tab-calculator">
+                <div class="calculator-container">
+                    <h2 class="section-title">Mortgage Calculator</h2>
+                    <p class="section-desc">Estimate monthly payments based on home value and interest rates.</p>
+                    
+                    <div class="calculator-grid">
+                        <div class="calculator-inputs">
+                            <div class="input-group">
+                                <div class="input-header">
+                                    <label for="slider-price">Home Price</label>
+                                    <span class="val-display" id="display-price">$450,000</span>
+                                </div>
+                                <input type="range" id="slider-price" min="100000" max="2000000" step="10000" value="450000">
+                            </div>
+
+                            <div class="input-group">
+                                <div class="input-header">
+                                    <label for="slider-down">Down Payment</label>
+                                    <span class="val-display" id="display-down">$90,000 (20%)</span>
+                                </div>
+                                <input type="range" id="slider-down" min="10000" max="1000000" step="5000" value="90000">
+                            </div>
+
+                            <div class="input-group">
+                                <div class="input-header">
+                                    <label for="slider-rate">Interest Rate</label>
+                                    <span class="val-display" id="display-rate">6.5%</span>
+                                </div>
+                                <input type="range" id="slider-rate" min="1" max="15" step="0.1" value="6.5">
+                            </div>
+
+                            <div class="input-group">
+                                <div class="input-header">
+                                    <label for="select-term">Loan Term</label>
+                                </div>
+                                <select id="select-term" class="calc-select">
+                                    <option value="30">30 Years Fixed</option>
+                                    <option value="20">20 Years Fixed</option>
+                                    <option value="15">15 Years Fixed</option>
+                                    <option value="10">10 Years Fixed</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="calculator-results">
+                            <div class="result-card">
+                                <h3>Estimated Monthly Payment</h3>
+                                <div class="payment-amount" id="result-payment">$2,275</div>
+                                <p class="payment-desc">Principal & Interest only.</p>
+                                
+                                <div class="breakdown-list">
+                                    <div class="breakdown-item">
+                                        <span class="dot loan"></span>
+                                        <span>Loan Amount:</span>
+                                        <span class="val" id="result-loan">$360,000</span>
+                                    </div>
+                                    <div class="breakdown-item">
+                                        <span class="dot interest"></span>
+                                        <span>Total Interest:</span>
+                                        <span class="val" id="result-total-interest">$459,181</span>
+                                    </div>
+                                    <div class="breakdown-item">
+                                        <span class="dot total-cost"></span>
+                                        <span>Total Payment:</span>
+                                        <span class="val" id="result-total-payment">$819,181</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <script type="module" src="app.js?v=1.3"></script>
+</body>
+</html>

@@ -1,0 +1,12 @@
+# Core Neuro SAN Agent dependencies
+neuro-san==0.6.72
+neuro-san-studio==0.3.8
+
+# LLM & Langchain Integration
+langchain-mistralai==1.1.6
+langchain-community==0.4.2
+
+# Coded Tools & Search
+ddgs==9.14.4
+requests==2.34.2
+python-dotenv==1.2.2

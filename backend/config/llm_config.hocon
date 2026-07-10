@@ -1,0 +1,8 @@
+{
+    "llm_config": {
+        "class": "langchain_mistralai.chat_models.ChatMistralAI",
+        "model": "mistral-large-latest",
+        "max_retries": 5,
+        "max_concurrent_requests": 1
+    }
+}
