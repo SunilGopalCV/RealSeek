@@ -10,7 +10,6 @@ RealSeek is an advanced agentic real estate recommendation platform. It leverage
 
 * **Multi-Agent Orchestration**: Master Orchestrator coordinating specialized agents (User Intent, Discovery, Market Intel, Neighborhood, Deal Analyzer, Recommendation).
 * **Dynamic Flowchart Visualization**: Real-time tracking of agent activation and execution states with edge-aligned SVG network links.
-* **New Chat Functionality**: Instantly clear history, reset conversation states, and clear insights dashboards.
 * **Resilient Rate-Limiting & Caching**: Custom global rate-limiter, SQLite LLM cache, and DuckDuckGo search lock/cache to prevent 429 exceptions and timeouts.
 * **Dynamic Insights extraction**: Parses links, prices, neighborhood quality index, and safety scores on-the-fly from agent streams.
 * **Mortgage Calculator**: Interactive payment estimator and amortization breakdown.
@@ -24,7 +23,7 @@ RealSeek/
 ├── backend/                  # Tornado & Neuro SAN backend service
 │   ├── config/               # LLM configuration (hocon)
 │   │   └── llm_config.hocon
-│   ├── registries/           # Declarative Agent Registries
+│   ├── registries/           
 │   │   ├── aaosa.hocon       # AAOSA coordination instructions
 │   │   ├── manifest.hocon    # Agent list registry manifest
 │   │   └── generated/
@@ -34,13 +33,13 @@ RealSeek/
 │   ├── __init__.py           # Package setup & global cache registration
 │   └── internet_search.py    # Search query scraper & dynamic LLM listing builder
 ├── frontend/                 # Lightweight served dashboard frontend
-│   ├── index.html            # Main dashboard structural layout
-│   ├── style.css             # Glassmorphic, tech grid dark mode stylesheet
-│   ├── chat.js               # Chat messaging & server stream handling
-│   ├── graph.js              # Real-time agent flowchart canvas rendering
-│   └── main.js               # Main script initialization & mortgage setup
+│   ├── index.html            
+│   ├── style.css             
+│   ├── chat.js               
+│   ├── graph.js              
+│   └── main.js               
 ├── start.sh                  # Shell script starting backend/frontend concurrently
-└── README.md                 # Project quickstart guide
+└── README.md                 
 ```
 
 ---
