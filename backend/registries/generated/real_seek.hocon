@@ -59,8 +59,9 @@ The master orchestrator agent coordinates the RealSeek agent network, ensuring s
               * Call `market_intelligence_agent` ONLY if the user explicitly asks for pricing trends, median values, appreciation, or ROI indicators.
               * Call `neighborhood_intelligence_agent` ONLY if the user explicitly asks for safety ratings, local schools, transit quality, or walkability info.
               * Call `deal_analyzer_agent` ONLY if the user explicitly asks for an affordability check or mortgage calculations.
+              * Call `planning_agent` if the user asks for a transaction/purchase roadmap, checklist, builder/seller verification, legal compliance/title clearance, risk assessments, or negotiation advice. The planning_agent will coordinate its tools to build a unified plan.
             - After receiving the responses from the active agents, call the `recommendation_agent` to synthesize the final markdown recommendations (including property listings with verified URLs, market valuation tables, and neighborhood rating cards) for the user.
-            - IMPORTANT: When presenting the response or output of any specialized agent (such as property_discovery_agent) to the user, you MUST extract the clean, human-readable natural language message (specifically from the "Response" field or the natural language text of the agent's output) and present ONLY that clean, friendly text to the user. Never output raw JSON, AAOSA blocks, or JSON structures containing keys like "Name", "Inquiry", "Mode", "Relevant", "Claim", or "Requirements" to the user.
+            - IMPORTANT: When presenting the response or output of any specialized agent (such as property_discovery_agent, planning_agent, deal_analyzer_agent, etc.) to the user, you MUST extract the clean, human-readable natural language message (specifically from the "Response" field or the natural language text of the agent's output) and present ONLY that clean, friendly text to the user. Never output raw JSON, AAOSA blocks, or JSON structures containing keys like "Name", "Inquiry", "Mode", "Relevant", "Claim", or "Requirements" to the user.
 The master orchestrator agent is responsible for overseeing and coordinating the entire RealSeek agent network. It ensures seamless integration and communication between various specialized agents to deliver comprehensive real estate intelligence. This agent must prioritize user intent, manage the execution plan, and synthesize information from multiple sources to provide personalized and data-backed recommendations.
 """ ${aaosa_instructions},
             "tools": ["user_intent_agent", "planning_agent", "property_discovery_agent", "market_intelligence_agent", "neighborhood_intelligence_agent", "deal_analyzer_agent", "recommendation_agent"]
@@ -100,6 +101,7 @@ Develops and manages a comprehensive plan to guide users through their real esta
             "instructions": ${instructions_prefix} ${demo_mode} """
 Your task is to develop a comprehensive plan to guide the user through their real estate journey. Start by analyzing the user's intent to understand their specific needs and preferences. Based on this analysis, create a detailed plan that outlines the steps required to achieve the user's real estate goals. This plan should include gathering relevant property information, assessing market conditions, evaluating financial considerations, and identifying potential risks. Ensure the plan is tailored to the user's unique situation and provides a clear roadmap for decision-making. Regularly update the plan as new information becomes available and as the user's needs evolve.
 Only claim relevance when the user asks for a plan, process roadmap, or next steps in their property search or transaction.
+- IMPORTANT: When compiling the plan or roadmaps from your tools (like risk_assessment_agent, legal_verification_agent, builder_seller_verification_agent, negotiation_advisor_agent, financial_advisor_agent), you MUST extract the clean, human-readable text from their "Response" fields and synthesize them into a unified markdown roadmap. Never copy-paste raw JSON blocks, AAOSA structures, or tool return metadata in your output.
 """ ${aaosa_instructions},
             "tools": ["builder_seller_verification_agent", "legal_verification_agent", "financial_advisor_agent", "negotiation_advisor_agent", "risk_assessment_agent"]
         },
@@ -229,6 +231,12 @@ Provides personalized real estate recommendations based on comprehensive data an
             },
             "instructions": ${instructions_prefix} """
 Your task is to provide personalized real estate recommendations based on comprehensive data analysis and user intent. Prioritize recommendations grounded in the real property listings, neighborhood info, and market data retrieved by other agents. For each recommended property, you MUST display its title, description, and the exact clickable listing URL link (e.g. Zillow/Redfin property details page, or local sites like Magicbricks/99acres) retrieved by the property discovery agent, rather than generic homepages. Never output generic links like https://www.zillow.com/ or https://www.realtor.com/. Present recommendations clearly and professionally.
+
+At the end of your final response, you MUST ALWAYS append a section titled "### 🧭 Recommended Next Steps" to help the user proceed. Provide exactly three bullet points with copy-pasteable follow-up queries that utilize the other specialized agents. For example:
+- "Check legal compliance and builder credentials: Ask '**What are the legal compliance checklist and builder reviews for these properties?**'"
+- "Assess transaction risks and get a roadmap: Ask '**Can you provide a step-by-step purchase roadmap, negotiation plan, and risk profile?**'"
+- "Evaluate financial/deal affordability: Ask '**Analyze the affordability metrics, estimated ROI, and monthly mortgage details for these properties.**'"
+
 Only claim relevance if all details are gathered and we are ready to synthesize the final recommended property list for the user.
 """ ${aaosa_instructions},
         },

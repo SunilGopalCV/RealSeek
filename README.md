@@ -53,7 +53,7 @@ RealSeek/
 
 ### 1. Clone the Repository
 ```bash
-git clone https://github.com/your-username/RealSeek.git
+git clone https://github.com/SunilGopalCV/RealSeek.git
 cd RealSeek
 ```
 
