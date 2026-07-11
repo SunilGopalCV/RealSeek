@@ -5,7 +5,7 @@
 RealSeek is an advanced agentic real estate recommendation platform. It leverages the **Cognizant Neuro SAN** multi-agent backend network to find, analyze, and recommend properties using real-time internet search results and market intelligence.
 
 ---
-![RealSeek Website Image](https://drive.google.com/file/d/1aLehXvODrNumAqJZbRS4-n4PRaD2WN1h/view?usp=drive_link)
+![RealSeek Website Image](https://drive.google.com/uc?export=view&id=1aLehXvODrNumAqJZbRS4-n4PRaD2WN1h)
 
 ## Key Features
 
