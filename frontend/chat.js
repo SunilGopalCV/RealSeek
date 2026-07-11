@@ -209,7 +209,7 @@ export async function handleSend() {
         
         // If response succeeded but returned nothing, show helpful warning
         if (!accumulatedText) {
-            updateAssistantMessage(aiMsgBubble, `⚠️ **No response received from the agent network.**\n\nThis usually indicates that the LLM API key (e.g., Mistral) configured on the backend is invalid, rate-limited, or unauthorized. Please verify your environment credentials.`);
+            updateAssistantMessage(aiMsgBubble, `[Warning] **No response received from the agent network.**\n\nThis usually indicates that the LLM API key (e.g., Mistral) configured on the backend is invalid, rate-limited, or unauthorized. Please verify your environment credentials.`);
             import('./graph.js').then(g => g.setUIStatus('idle', 'Empty response received.'));
         }
 
@@ -220,7 +220,7 @@ export async function handleSend() {
             g.resetGraph();
         });
         
-        updateAssistantMessage(aiMsgBubble, `❌ **Connection to Real Estate Server failed.**\n\nPlease ensure the backend API server is running on port **8080** by executing:\n\`\`\`bash\n./start_backend.sh\n\`\`\``);
+        updateAssistantMessage(aiMsgBubble, `[Error] **Connection to Real Estate Server failed.**\n\nPlease ensure the backend API server is running on port **8080** by executing:\n\`\`\`bash\n./start_backend.sh\n\`\`\``);
     } finally {
         state.isSending = false;
         dom.chatInput.disabled = false;

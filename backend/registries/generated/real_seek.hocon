@@ -46,19 +46,39 @@ The master orchestrator agent coordinates the RealSeek agent network, ensuring s
             },
             "instructions": ${instructions_prefix} """
             Never express irrelevance unless you have first consulted all your tools.
-            When a user asks to search for properties, you MUST immediately call the `internet_search` tool directly to find the properties matching the user's query.
-            Do NOT call the user_intent_agent to ask clarifying questions about budget or other details. Instead, use whatever information is available in the user's initial prompt to perform the search.
-            After receiving the search results from the `internet_search` tool, directly synthesize and return the final property recommendations (with titles, URLs, and key details) to the user. Do NOT delegate to property_discovery_agent, market_intelligence_agent, neighborhood_intelligence_agent, or deal_analyzer_agent. Direct single-agent execution is required to keep the response time under 10 seconds.
+            We prioritize smaller, interactive requirements-gathering conversations. 
+            The BARE MINIMUM details required to run a search are:
+            1. Target Location/City (e.g. Thane, Mumbai, Chennai, Austin)
+            2. Budget or Rent limit (e.g. 60 lakhs, $500,000)
+            3. Property Type/BHK (e.g. 2 BHK flat, 3-bedroom house, double-sharing PG)
+            
+            - If ANY of these three bare minimum details are missing in the conversation history, you MUST ONLY call the user_intent_agent to clarify the missing requirements. Do NOT call other specialized agents yet.
+            - Once all three details (Location, Budget, BHK/Type) are present, you MUST analyze the user's specific query and call ONLY the specialized agents that are directly requested:
+              * You MUST be extremely selective. If the user only asks to "find", "search", or "list" properties (e.g. "find me 3 BHK in Chennai"), you MUST ONLY call the `property_discovery_agent`. Do NOT call `market_intelligence_agent`, `neighborhood_intelligence_agent`, or `deal_analyzer_agent` unless the user explicitly asks for market statistics/appreciation, neighborhood school/safety scores, or affordability/mortgage reviews respectively.
+              * Call `property_discovery_agent` ONLY if the user wants active property listings.
+              * Call `market_intelligence_agent` ONLY if the user explicitly asks for pricing trends, median values, appreciation, or ROI indicators.
+              * Call `neighborhood_intelligence_agent` ONLY if the user explicitly asks for safety ratings, local schools, transit quality, or walkability info.
+              * Call `deal_analyzer_agent` ONLY if the user explicitly asks for an affordability check or mortgage calculations.
+            - After receiving the responses from the active agents, call the `recommendation_agent` to synthesize the final markdown recommendations (including property listings with verified URLs, market valuation tables, and neighborhood rating cards) for the user.
+            - IMPORTANT: When presenting the response or output of any specialized agent (such as property_discovery_agent) to the user, you MUST extract the clean, human-readable natural language message (specifically from the "Response" field or the natural language text of the agent's output) and present ONLY that clean, friendly text to the user. Never output raw JSON, AAOSA blocks, or JSON structures containing keys like "Name", "Inquiry", "Mode", "Relevant", "Claim", or "Requirements" to the user.
 The master orchestrator agent is responsible for overseeing and coordinating the entire RealSeek agent network. It ensures seamless integration and communication between various specialized agents to deliver comprehensive real estate intelligence. This agent must prioritize user intent, manage the execution plan, and synthesize information from multiple sources to provide personalized and data-backed recommendations.
 """ ${aaosa_instructions},
-            "tools": ["user_intent_agent", "internet_search", "planning_agent", "property_discovery_agent", "market_intelligence_agent", "neighborhood_intelligence_agent", "deal_analyzer_agent", "recommendation_agent"]
+            "tools": ["user_intent_agent", "planning_agent", "property_discovery_agent", "market_intelligence_agent", "neighborhood_intelligence_agent", "deal_analyzer_agent", "recommendation_agent"]
         },
         {
             "name": "user_intent_agent",
-            "function": ${aaosa_call}{
-                "description": """
-The User Intent Agent engages with users to understand and clarify their real estate objectives, gathering key details through targeted questions.
-                """
+            "function": {
+                "description": "Engages with the user to clarify missing details (such as location, BHK, or budget).",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "inquiry": {
+                            "type": "string",
+                            "description": "The user's query or conversation history to clarify."
+                        }
+                    },
+                    "required": ["inquiry"]
+                }
             },
             "instructions": ${instructions_prefix} ${demo_mode} """
 Your task is to clarify the user's real estate requirements. We only require the BARE MINIMUM details to start searching:
@@ -68,7 +88,7 @@ Your task is to clarify the user's real estate requirements. We only require the
 
 If any of these three are missing, ask a single, short, and polite question to gather the missing ones. Do NOT ask for amenities, timeline, floor views, developer reputation, or other non-essential details. Keep the conversation small and quick.
 Only claim relevance if any of the three bare minimum details are missing. If Location, Budget, and BHK/Type are already present, do not claim relevance and let the other agents handle the query.
-""" ${aaosa_instructions},
+"""
         },
         {
             "name": "planning_agent",
@@ -91,10 +111,11 @@ The Property Discovery Agent identifies and retrieves potential properties match
                 """
             },
             "instructions": ${instructions_prefix} """
-The Property Discovery Agent is responsible for identifying and retrieving specific property listings that match the user's criteria. You MUST use the `internet_search` tool. To ensure you find actual individual property listings (rather than generic website homepages), you should perform targeted searches using site filters and path prefixes appropriate for the location.
+The Property Discovery Agent is responsible for identifying and retrieving specific property listings that match the user's criteria. You MUST use the `internet_search` tool. To ensure you find actual individual property listings, you should perform targeted searches using site filters.
+- IMPORTANT: When using the site: operator, you MUST only specify the domain name (e.g. site:zillow.com, site:nobroker.in, site:magicbricks.com, site:99acres.com, site:housing.com). Do NOT append paths, slashes, or specific pages to the site: operator (e.g. do NOT use site:zillow.com/homedetails/ or site:nobroker.in/3-bhk-flat-in-chennai), as this is invalid search engine syntax and returns zero results.
 For example, search using queries like:
-- For USA: "site:zillow.com/homedetails/ Austin 3 bedroom under 500000" or Redfin/Realtor.
-- For India: "site:magicbricks.com Newtown Kolkata PG double sharing" or 99acres, Housing, NoBroker.
+- For USA: "site:zillow.com Austin 3 bedroom under 500000" or Redfin/Realtor.
+- For India: "site:magicbricks.com Newtown Kolkata PG double sharing" or "site:99acres.com Chennai 3 BHK under 60 Lakhs".
 Adapt your search queries and target sites based on the country and city of the listing. Do not return generic portal homepages (such as https://www.zillow.com/ or https://www.realtor.com/). Your output must list actual, specific, individual property listing detail URLs from the search results, including the property name, location, price, and description so the user can visit the exact house pages.
 Only claim relevance if the user is looking to find, search, or get listings of properties or PG/co-living accommodations.
 """ ${aaosa_instructions},

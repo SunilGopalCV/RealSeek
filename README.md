@@ -17,6 +17,34 @@ RealSeek is an advanced agentic real estate recommendation platform. It leverage
 
 ---
 
+## Project Structure
+
+```text
+RealSeek/
+├── backend/                  # Tornado & Neuro SAN backend service
+│   ├── config/               # LLM configuration (hocon)
+│   │   └── llm_config.hocon
+│   ├── registries/           # Declarative Agent Registries
+│   │   ├── aaosa.hocon       # AAOSA coordination instructions
+│   │   ├── manifest.hocon    # Agent list registry manifest
+│   │   └── generated/
+│   │       └── real_seek.hocon # RealSeek cognitive network configs
+│   └── run_server.py         # Main Tornado backend API server
+├── coded_tools/              # Custom python tools invoked by agents
+│   ├── __init__.py           # Package setup & global cache registration
+│   └── internet_search.py    # Search query scraper & dynamic LLM listing builder
+├── frontend/                 # Lightweight served dashboard frontend
+│   ├── index.html            # Main dashboard structural layout
+│   ├── style.css             # Glassmorphic, tech grid dark mode stylesheet
+│   ├── chat.js               # Chat messaging & server stream handling
+│   ├── graph.js              # Real-time agent flowchart canvas rendering
+│   └── main.js               # Main script initialization & mortgage setup
+├── start.sh                  # Shell script starting backend/frontend concurrently
+└── README.md                 # Project quickstart guide
+```
+
+---
+
 ## Setup & Installation
 
 ### Prerequisites
@@ -55,8 +83,16 @@ pip install -r requirements.txt
 ## Running the Application
 
 To start both the frontend served web server and backend REST server concurrently, run:
-```bash
-./start.sh
-```
+
+* **Linux / macOS**:
+  ```bash
+  ./start.sh
+  ```
+* **Windows**:
+  Double-click `start.bat` or run:
+  ```cmd
+  start.bat
+  ```
+
 * **Frontend Dashboard**: [http://localhost:5173/](http://localhost:5173/)
 * **Backend REST API**: `http://localhost:8080`

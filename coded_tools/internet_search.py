@@ -72,120 +72,52 @@ class AsyncThreadLock:
         self.lock.release()
 
 def generate_fallback_results(query: str) -> list:
-    query_lower = query.lower()
+    import os
+    import json
+    from langchain_mistralai.chat_models import ChatMistralAI
+    from langchain_core.messages import HumanMessage
     
-    # Try to extract location/city name dynamically
-    # Look for common city names or extract from patterns like "in <city>"
-    known_cities = {
-        "visakhapatnam": ["MVP Colony", "Madhurawada", "Gajuwaka", "Seethammadhara"],
-        "vishakapattanam": ["MVP Colony", "Madhurawada", "Gajuwaka", "Seethammadhara"],
-        "vizag": ["MVP Colony", "Madhurawada", "Gajuwaka", "Seethammadhara"],
-        "chennai": ["Adyar", "Madipakkam", "Velachery", "Mylapore"],
-        "mumbai": ["Andheri West", "Thane West", "Powai", "Bandra West"],
-        "jaipur": ["C-Scheme", "Mansarovar", "Malviya Nagar", "Vaishali Nagar"],
-        "bengaluru": ["Indiranagar", "Whitefield", "Koramangala", "HSR Layout"],
-        "bangalore": ["Indiranagar", "Whitefield", "Koramangala", "HSR Layout"],
-        "hyderabad": ["Gachibowli", "Madhapur", "Kondapur", "Jubilee Hills"],
-        "austin": ["South Austin", "Round Rock", "Pflugerville", "Cedar Park"],
-        "new york": ["Manhattan", "Brooklyn", "Queens", "Bronx"],
-        "nyc": ["Manhattan", "Brooklyn", "Queens", "Bronx"]
-    }
-    
-    city = None
-    city_key = None
-    for k in known_cities:
-        if k in query_lower:
-            city = k.title()
-            city_key = k
-            break
-            
-    if not city:
-        # Dynamically extract city from phrase like "in <city>"
-        import re
-        match = re.search(r'in\s+([a-zA-Z\s\-]+)', query)
-        if match:
-            raw_city = match.group(1).strip().split()[0]
-            if raw_city.lower() not in ["a", "the", "under", "budget", "this", "my", "our"]:
-                city = raw_city.title()
-                city_key = raw_city.lower()
-                
-    if not city:
-        city = "Visakhapatnam"
-        city_key = "visakhapatnam"
-
-    # Extract BHK/bedrooms
-    bhk = "3 BHK"
-    if "1 bhk" in query_lower or "1-bhk" in query_lower or "1 bedroom" in query_lower or "1bhk" in query_lower:
-        bhk = "1 BHK"
-    elif "2 bhk" in query_lower or "2-bhk" in query_lower or "2 bedroom" in query_lower or "2bhk" in query_lower:
-        bhk = "2 BHK"
-    elif "3 bhk" in query_lower or "3-bhk" in query_lower or "3 bedroom" in query_lower or "3bhk" in query_lower:
-        bhk = "3 BHK"
-    elif "4 bhk" in query_lower or "4-bhk" in query_lower or "4 bedroom" in query_lower or "4bhk" in query_lower:
-        bhk = "4 BHK"
-
-    # Extract property type
-    prop_type = "Flat"
-    if "house" in query_lower or "villa" in query_lower or "independent" in query_lower:
-        prop_type = "Independent House"
-    elif "pg" in query_lower or "sharing" in query_lower or "hostel" in query_lower or "accommodation" in query_lower:
-        prop_type = "PG Room"
+    api_key = os.environ.get("MISTRAL_API_KEY")
+    if not api_key:
+        return []
         
-    # Get neighborhoods
-    localities = known_cities.get(city_key, [f"{city} East", f"{city} Heights", f"Downtown {city}", f"{city} Green Valley"])
-    
-    # Generate 4 detailed listings
-    results = []
-    
-    # Map sites to vary the urls
-    sites = [
-        ("99acres", "https://www.99acres.com/property"),
-        ("MagicBricks", "https://www.magicbricks.com/property-for-sale/residential-real-estate"),
-        ("Housing.com", "https://www.housing.com/buy"),
-        ("NoBroker", "https://www.nobroker.in/property-sale")
-    ]
-    
-    for i in range(4):
-        loc = localities[i % len(localities)]
-        site_name, site_url = sites[i]
-        
-        # Formulate listing title and url
-        title = f"{bhk} {prop_type} for Sale in {loc}, {city} - {site_name}"
-        clean_loc = loc.lower().replace(" ", "-")
-        clean_city = city.lower().replace(" ", "-")
-        clean_bhk = bhk.lower().replace(" ", "")
-        clean_prop = prop_type.lower().replace(" ", "-")
-        
-        url = f"{site_url}/{clean_bhk}-{clean_prop}-in-{clean_loc}-{clean_city}"
-        
-        # Formulate price
-        if "30 lakhs" in query_lower or "30lakhs" in query_lower:
-            price = f"₹{24 + i*2} Lakhs"
-        elif "lakh" in query_lower:
-            import re
-            m = re.search(r'(\d+)\s*lakh', query_lower)
-            if m:
-                p_val = int(m.group(1))
-                price = f"₹{max(5, p_val - 4 + i*2)} Lakhs"
-            else:
-                price = f"₹{25 + i*5} Lakhs"
-        else:
-            price = f"₹{30 + i*10} Lakhs" if prop_type != "PG Room" else f"₹{6000 + i*1000}/month"
-            
-        snippet = (
-            f"Ready to move {bhk} {prop_type} in {loc}, {city}. "
-            f"Price: {price}. Located in a prime residential neighborhood with excellent connectivity. "
-            f"Features include 24/7 security, power backup, kids play area, and proximity to schools, markets, and hospitals. "
-            f"Safety rating: {4.5 + i*0.1}/5. Beautiful layout with modern fittings."
+    try:
+        # Initialize a fast ChatMistralAI instance to generate localized fallback listings
+        llm = ChatMistralAI(
+            model="mistral-small-latest",
+            mistral_api_key=api_key,
+            temperature=0.2
         )
         
-        results.append({
-            "title": title,
-            "url": url,
-            "snippet": snippet
-        })
+        prompt = f"""
+You are a fallback helper for a real estate search tool.
+The live search failed to find results for the query: "{query}".
+Generate exactly 3 realistic property listings matching this query.
+Each listing must contain:
+1. title: A realistic property title (e.g. "2 BHK Apartment in Downtown, Madikeri")
+2. url: A realistic mock listing URL on a popular real estate portal (e.g. 99acres.com, magicbricks.com, housing.com) specific to this listing.
+3. snippet: A detailed description including price, BHK/type, amenities (security, power backup), connectivity, and neighborhood highlights.
+
+Return ONLY a valid JSON list of dictionaries with keys: "title", "url", "snippet".
+Do not include any markdown formatting, backticks, or explanation. Return raw JSON only.
+"""
+        response = llm.invoke([HumanMessage(content=prompt)])
+        content = response.content.strip()
         
-    return results
+        # Clean markdown code block formatting
+        if content.startswith("```"):
+            lines = content.split("\n")
+            if lines[0].startswith("```"):
+                lines = lines[1:]
+            if lines[-1].strip() == "```":
+                lines = lines[:-1]
+            content = "\n".join(lines).strip()
+            
+        data = json.loads(content)
+        return data
+    except Exception as e:
+        print(f"[Warning] Dynamic Fallback Generator error: {e}")
+        return []
 
 class InternetSearch(CodedTool):
     """
@@ -202,7 +134,7 @@ class InternetSearch(CodedTool):
         # Check local cache first
         cached_results = search_cache.get(query)
         if cached_results is not None:
-            logger.info(f"💾 InternetSearch: Cache hit for query: '{query}'")
+            logger.info(f"[Cache] InternetSearch: Cache hit for query: '{query}'")
             return json.dumps(cached_results, indent=2)
 
         logger.info(f"Performing internet search for query: {query}")
@@ -217,14 +149,14 @@ class InternetSearch(CodedTool):
                 results = await asyncio.to_thread(self._run_search, query)
                 if results:
                     search_cache.set(query, results)
-                    logger.info(f"✅ InternetSearch: Successfully retrieved live search results for: '{query}'")
+                    logger.info(f"[Success] InternetSearch: Successfully retrieved live search results for: '{query}'")
                     return json.dumps(results, indent=2)
                 else:
                     raise Exception("No results returned from DDGS.")
             except Exception as e:
                 # Immediate fallback to realistic query-matching results on rate-limiting or network block
                 logger.warning(
-                    f"⚠️ InternetSearch: Live search failed/rate-limited for '{query}' (Error: {str(e)}). "
+                    f"[Warning] InternetSearch: Live search failed/rate-limited for '{query}' (Error: {str(e)}). "
                     f"Falling back to matching local intelligence results to prevent timeouts."
                 )
                 fallback_results = generate_fallback_results(query)

@@ -1,7 +1,7 @@
 {
     "llm_config": {
         "class": "langchain_mistralai.chat_models.ChatMistralAI",
-        "model": "mistral-large-latest",
+        "model": "mistral-small-latest",
         "max_retries": 5,
         "max_concurrent_requests": 1
     }
