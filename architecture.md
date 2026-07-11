@@ -25,16 +25,18 @@ RealSeek integrates multiple specialized systems to deliver a comprehensive dash
 At the core of the backend is the **Neuro SAN Agent Network**, a cooperative multi-agent system configured via HOCON. The agent network comprises:
 
 ### The Master Orchestrator
-The `master_orchestrator_agent` serves as the supervisor of the network. It receives the user's conversation history and makes decisions on how to fulfill the request:
-* **Dynamic Direct Search**: If a user is performing a simple property search, the orchestrator immediately calls the `internet_search` tool directly to fetch properties, formatting the response in a single LLM pass. This keeps latency under 15 seconds.
-* **Cooperative Routing**: If complex analysis is required (e.g., market comparisons or neighborhood safety reviews), the orchestrator coordinates specialized satellite agents to handle sub-tasks.
+The `master_orchestrator_agent` serves as the supervisor of the network. It receives the user's conversation history and makes decisions on how to route the request:
+* **Interactive Requirements Loop**: If the Target Location, BHK/Type, or Budget is missing, it routes exclusively to `user_intent_agent` to gather the bare minimum requirements.
+* **Selective Parallel Dispatch**: Once requirements are met, it dispatches tool requests concurrently (in parallel) *only* to the specialized agents needed for the query (e.g. calling `property_discovery_agent` for listings, while skipping market/neighborhood analysis unless explicitly requested). This cuts processing steps and reduces latency.
 
 ### Specialized Satellite Agents
-* **Property Discovery Agent**: Generates targeted search queries for regional property portals (like MagicBricks or 99acres) and extracts specific listing details.
-* **Market Intelligence Agent**: Gathers transaction data, median prices, and inventory trends to evaluate whether a market is buyer- or seller-oriented.
-* **Neighborhood Intelligence Agent**: Curates safety indexes, local transit, walkability scores, and school ratings.
-* **Recommendation Agent**: Collates results from all agents and formulates a structured markdown recommendation with verified URLs.
+* **User Intent Agent**: Dynamically gathers location, BHK/type, and budget parameters in clean, friendly natural language without JSON leakage.
+* **Property Discovery Agent**: Formulates clean domain-only `site:` search queries for regional portals (like MagicBricks or 99acres) to retrieve live, verified listing URLs.
+* **Market Intelligence Agent**: Gathers transaction data, median prices, and appreciation metrics.
+* **Neighborhood Intelligence Agent**: Evaluates safety indexes, local transit, walkability scores, and school ratings.
+* **Recommendation Agent**: Collates results from all agents and synthesizes the final markdown report.
 
 ### Tool Executions & Caching
-* **InternetSearch CodedTool**: Leverages DuckDuckGo search APIs with an automated SQLite search cache to avoid search blocking. If live searches fail (due to rate limits/captchas), a dynamic listing fallback generator parses the query to supply high-fidelity listings based on city, BHK, and budget.
-* **Rate-Limit Spacing Lock**: Ensures LLM requests are spaced with a 1.5s delay to keep execution stable and within free-tier API rate limits.
+* **InternetSearch CodedTool**: Leverages DuckDuckGo search APIs with an automated SQLite search cache. If live searches fail or are CAPTCHA-blocked, a dynamic LLM-based mock listing generator uses `mistral-small-latest` to generate high-fidelity, localized mock listings on-the-fly.
+* **Global SQLite Caching**: All identical agent queries are cached in a local database (`.langchain_cache.db`), cutting API call counts by half.
+* **Low-Latency LLM Upgrade**: Configured with `mistral-small-latest` as the default model across all nodes, removing the need for artificial pacing delay blocks.

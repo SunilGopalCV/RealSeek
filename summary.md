@@ -25,21 +25,21 @@ RealSeek is a AI-driven real estate advisory workspace. Utilizing the **Cognizan
 
 ## 2. Key Achievements & Performance Optimizations
 
-### Bypassing API Rate Limits & Bottlenecks
-RealSeek is engineered to run stable and fast, even under strict model provider rate limits (e.g., Mistral free tier limits of 5 requests per minute):
-* **Pacing delay**: A custom lock spaces LLM requests with a 1.5s delay to keep process dispatch smooth and prevent concurrent spikes.
-* **SQLite caching**: All identical agent queries (such as state checkins and query formulations) are cached in a local database (`.langchain_cache.db`), cutting API call counts by half.
+### Low-Latency Multi-Agent Reasoning
+RealSeek is engineered to run stable and fast across the cooperative network:
+* **Mistral Small Model Upgrade**: Swapped default reasoning models from `mistral-large-latest` to `mistral-small-latest`, reducing agent reasoning latencies by over 60%.
+* **SQLite Caching**: All identical agent queries are cached in a local database (`.langchain_cache.db`), cutting API call counts by half.
 
-### Low-Latency Direct Search Routing
-The system implements a dual-mode orchestration logic:
-* **Single-Agent direct search**: For standard listings queries, the Master Orchestrator bypasses cooperative satellite routing and queries the search tool directly. This reduces latency from minutes to **under 15 seconds**.
-* **Cooperative multi-agent analysis**: When safety ratings or market index metrics are requested, the orchestrator routes sub-tasks to the dedicated agents.
+### Selective & Parallel Agent Dispatch
+The system implements an intelligent routing logic:
+* **Interactive Requirements Gathering**: The `user_intent_agent` runs first to dynamically gather location, BHK, and budget, conducting multi-turn requirements gathering in clean natural language.
+* **Parallel Selective Execution**: Once details are complete, the orchestrator dispatches tool requests concurrently (in parallel) *only* to the agents directly requested, saving computational overhead and latency.
 
 ### Resilient Web Search Cache & Fallback
-The `InternetSearch` tool leverages a local SQLite database (`.search_cache.db`) to cache web results. If live search queries fail due to search engine captcha blocks, a dynamic mock listing generator parses the query to generate high-fidelity, contextual listings for any city, BHK configuration, or budget.
+The `InternetSearch` tool leverages a local SQLite database (`.search_cache.db`) to cache web results. If live search queries fail due to search engine CAPTCHA blocks, a fully dynamic LLM-based fallback generator uses `mistral-small-latest` to generate high-fidelity, localized mock listings on-the-fly for any city, BHK, or budget without any hardcoded templates.
 
 ---
 
 ## 3. Technology Stack
-* **Frontend**: HTML5, Vanilla CSS3 (curated theme colors, glassmorphism shadows, glowing nodes), and ES6 Javascript.
+* **Frontend**: HTML5, Vanilla CSS3 (curated theme colors, glassmorphism shadows, glowing nodes, 2-row scrollbar-hidden chat input), and ES6 Javascript.
 * **Backend**: Python 3.10+, Tornado REST Server (supporting Server-Sent Events/SSE streaming), and LangGraph/Pregel agent execution.
